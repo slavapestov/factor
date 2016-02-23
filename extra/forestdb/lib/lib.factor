@@ -1,10 +1,11 @@
 ! Copyright (C) 2014 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors alien.c-types alien.data alien.strings arrays
-classes.struct combinators constructors continuations
-destructors forestdb.ffi forestdb.paths fry generalizations
-io.encodings.string io.encodings.utf8 io.pathnames kernel libc
-math multiline namespaces sequences ;
+byte-arrays classes.struct combinators constructors
+continuations destructors forestdb.ffi forestdb.paths fry
+generalizations io.encodings.string io.encodings.utf8
+io.pathnames kernel libc math multiline namespaces sequences
+strings ;
 QUALIFIED: sets
 IN: forestdb.lib
 
@@ -46,9 +47,14 @@ SYMBOL: current-fdb-kvs-handle
 : get-kvs-handle ( -- handle )
     current-fdb-kvs-handle get handle>> ;
 
+GENERIC: encode-kv ( object -- bytes )
+
+M: string encode-kv utf8 encode ;
+M: byte-array encode-kv ;
+
 : fdb-set-kv ( key value -- )
     [ get-kvs-handle ] 2dip
-    [ utf8 encode dup length ] bi@ fdb_set_kv fdb-check-error ;
+    [ encode-kv dup length ] bi@ fdb_set_kv fdb-check-error ;
 
 : <key-doc> ( key -- doc )
     fdb_doc malloc-struct
